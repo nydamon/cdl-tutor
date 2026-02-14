@@ -90,8 +90,42 @@ const routes = {
       const data = await response.json();
       return { status: 200, json: data };
     }
+  },
+  
+  // Stripe checkout
+  '/api/billing/create-checkout': {
+    status: 200,
+    async: true,
+    handler: async () => {
+      if (!STRIPE_SECRET_KEY) {
+        return { status: 503, json: { error: 'Stripe not configured' }};
+      }
+      
+      // Create checkout session via Stripe API
+      const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+          'mode': 'subscription',
+          'payment_method_types[]': 'card',
+          'line_items[0][price_data][currency]': 'usd',
+          'line_items[0][price_data][product_data][name]': 'CDL Tutor Premium',
+          'line_items[0][price_data][product_data][description]': 'Unlimited voice sessions, all 50 states, practice tests',
+          'line_items[0][price_data][unit_amount]': '999',
+          'line_items[0][price_data][recurring][interval]': 'month',
+          'line_items[0][quantity]': '1',
+          'success_url': 'https://cdl-tutor.vercel.app?success=true',
+          'cancel_url': 'https://cdl-tutor.vercel.app?canceled=true'
+        })
+      });
+      
+      const data = await response.json();
+      return { status: 200, json: { url: data.url || data.error }};
+    }
   }
-};
 
 const server = createServer(async (req, res) => {
   const url = parse(req.url, true);

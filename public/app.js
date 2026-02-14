@@ -121,8 +121,9 @@ class CDL Tutor {
         });
         
         if (result.url) {
-            // Redirect to checkout (placeholder - would be Stripe)
-            alert('Stripe checkout integration coming soon! Plan: ' + plan);
+            window.location.href = result.url;
+        } else if (result.error) {
+            alert('Checkout not available: ' + result.error);
         }
     }
 }
