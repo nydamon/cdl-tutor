@@ -2,81 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#1a1a2e">
+    <title>CDL Tutor - Pass Your Test</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="CDL Prep">
-    <title>CDL Prep with Red</title>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
         <header>
-            <span class="truck-emoji">🚛</span>
-            <h1>CDL Prep — NJ Edition</h1>
-            <p class="subtitle">Just you and Red. No flashcards, just conversation.</p>
-            <div class="voice-toggle">
-                <button id="voiceBtn" class="voice-btn" title="Toggle voice mode">
-                    <span id="voiceIcon">🔊</span> Voice Mode: <span id="voiceStatus">OFF</span>
-                </button>
-            </div>
+            <div class="logo">🚛</div>
+            <h1>CDL Tutor</h1>
+            <p class="tagline">Your AI-Powered CDL Prep Companion</p>
         </header>
 
-        <div class="progress-bar" id="progressBar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <div style="text-align: center; font-size: 0.8rem; color: #a8a8b3; margin-bottom: 5px;">
-            CDL Mastery: <span id="masteryPct">0</span>%
-        </div>
+        <main id="app">
+            <!-- State Selection Screen -->
+            <section id="state-select" class="screen">
+                <h2>Select Your State</h2>
+                <p class="subtitle">Choose the state where you're getting your CDL</p>
+                <select id="state-dropdown">
+                    <option value="">Loading states...</option>
+                </select>
+                <button id="continue-btn" class="primary-btn" disabled>Continue</button>
+            </section>
 
-        <!-- Topic Indicators -->
-        <div class="topic-container" id="topicContainer">
-            <!-- Topic chips injected here -->
-        </div>
+            <!-- Main Dashboard (shown after state selection) -->
+            <section id="dashboard" class="screen hidden">
+                <div class="stats-card">
+                    <h3>Your Progress</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <p class="progress-text"><span id="progress-pct">0</span>% Complete</p>
+                </div>
 
-        <main class="chat-container" id="chatContainer">
-            <!-- Messages appear here -->
+                <div class="action-buttons">
+                    <button id="start-btn" class="big-red-btn">
+                        <span class="btn-icon">📞</span>
+                        Start Voice Session
+                    </button>
+                    <button id="practice-btn" class="secondary-btn">
+                        <span class="btn-icon">📝</span>
+                        Practice Questions
+                    </button>
+                    <button id="progress-btn" class="secondary-btn">
+                        <span class="btn-icon">📊</span>
+                        View Progress
+                    </button>
+                </div>
+
+                <div class="upgrade-banner" id="upgrade-banner">
+                    <p>🔒 Upgrade to unlock all features</p>
+                    <button id="upgrade-btn">Get Premium</button>
+                </div>
+            </section>
+
+            <!-- Upgrade Screen -->
+            <section id="upgrade" class="screen hidden">
+                <h2>Upgrade to Premium</h2>
+                <div class="pricing-cards">
+                    <div class="pricing-card">
+                        <h3>Monthly</h3>
+                        <p class="price">$9.99<span>/mo</span></p>
+                        <ul>
+                            <li>✅ Unlimited Voice Sessions</li>
+                            <li>✅ All 50 States</li>
+                            <li>✅ Practice Tests</li>
+                            <li>✅ Progress Tracking</li>
+                        </ul>
+                        <button class="subscribe-btn" data-plan="monthly">Subscribe</button>
+                    </div>
+                    <div class="pricing-card featured">
+                        <h3>Annual</h3>
+                        <p class="price">$79.99<span>/yr</span></p>
+                        <p class="savings">Save 33%!</p>
+                        <ul>
+                            <li>✅ Everything in Monthly</li>
+                            <li>✅ Priority Support</li>
+                            <li>✅ Early Access to New Features</li>
+                        </ul>
+                        <button class="subscribe-btn" data-plan="annual">Subscribe</button>
+                    </div>
+                </div>
+                <button id="back-btn" class="text-btn">← Back to Dashboard</button>
+            </section>
         </main>
 
-        <div class="input-area">
-            <div class="typing-indicator" id="typingIndicator">
-                <span></span><span></span><span></span>
-            </div>
-            
-            <div class="input-row">
-                <button id="micBtn" class="mic-btn" title="Hold to talk">
-                    <span class="mic-icon">🎤</span>
-                </button>
-                <input 
-                    type="text" 
-                    id="messageInput" 
-                    placeholder="Type or hold mic to talk..."
-                    autocomplete="off"
-                >
-                <button id="sendBtn" class="send-btn">
-                    <span>Send</span>
-                </button>
-            </div>
-            
-            <div class="mic-hint" id="micHint">Hold mic button or press Space to talk</div>
-        </div>
-
-        <footer class="controls">
-            <button id="resumeBtn" class="secondary-btn">Resume Session</button>
-            <button id="newSessionBtn" class="secondary-btn">Start Fresh</button>
-            <button id="progressBtn" class="secondary-btn">Detailed Stats</button>
+        <footer>
+            <p>&copy; 2026 CDL Tutor. All rights reserved.</p>
         </footer>
-    </div>
-
-    <!-- Progress Modal -->
-    <div id="progressModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>📊 Your CDL Progress</h2>
-            <div id="progressContent"></div>
-        </div>
     </div>
 
     <script src="app.js"></script>

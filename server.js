@@ -1,36 +1,12 @@
-const path = require('path');
-const fs = require('fs');
-const multer = require('multer');
-const { OpenAI } = require('openai');
+// Simple Express server for CDL Tutor
 require('dotenv').config();
-
-const upload = multer({ dest: 'uploads/' });
-
-// Initialize OpenAI only if key is available
-let openai = null;
-if (process.env.OPENAI_API_KEY && !process.env.OPENAI_API_KEY.includes('placeholder')) {
-  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-}
-
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { 
-  initDB, getDB, createSession, getLatestSession, getSessionMessages, 
-  addMessage, getProgressSummary, getWeakTopics, recordTopicExposure 
-} = require('./database');
-const { CDL_TUTOR_PROMPT } = require('./prompts/system');
 
 const express = require('express');
 const cors = require('cors');
-const app = express();
-const PORT = process.env.PORT || 3947;
+const path = require('path');
 
-// Initialize Gemini only if key is available
-let genAI = null;
-let model = null;
-if (process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.includes('placeholder')) {
-  genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-}
+const app = express();
+const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(cors());
@@ -39,140 +15,89 @@ app.use(express.static('public'));
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', openai: !!openai, db: !!db });
+  res.json({ 
+    status: 'ok', 
+    version: '1.0.0',
+    openaiConfigured: !!(process.env.OPENAI_API_KEY && !process.env.OPENAI_API_KEY.includes('placeholder')),
+    stripeConfigured: !!(process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('placeholder')),
+    clerkConfigured: !!(process.env.CLERK_SECRET_KEY && !process.env.CLERK_SECRET_KEY.includes('placeholder'))
+  });
 });
 
-// Initialize DB (async for PostgreSQL) - with error handling
-let db;
-(async () => {
-  try {
-    db = await initDB();
-    console.log('Database initialized');
-  } catch (err) {
-    console.error('Database connection failed:', err.message);
-    console.log('Continuing without database...');
-  }
-})();
-
-// --- NEW: Realtime Token Endpoint ---
-app.get('/api/realtime-token', async (req, res) => {
-  // Check if OpenAI is configured
-  if (!openai) {
-    return res.status(503).json({ error: 'OpenAI not configured. Please add OPENAI_API_KEY.' });
-  }
-  
-  try {
-    // Get weak areas to prime the voice session (skip if DB unavailable)
-    let context = "";
-    if (db) {
-      try {
-        const weakTopics = await getWeakTopics(db, 3);
-        context = weakTopics.length > 0 
-          ? `\n\n[ Joey's current weak spots: ${weakTopics.map(t => t.topic_name).join(', ')}. Focus on these naturally in conversation. ]`
-          : "";
-      } catch (e) {
-        console.log('Could not fetch weak topics:', e.message);
-      }
-    }
-
-    const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-realtime-preview',
-        modalities: ['audio', 'text'],
-        instructions: CDL_TUTOR_PROMPT + context,
-      }),
-    });
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// Auth routes (Clerk integration placeholder)
+app.post('/api/auth/clerk-webhook', express.json(), (req, res) => {
+  // Handle Clerk webhooks for user creation/deletion
+  console.log('Clerk webhook:', req.body);
+  res.json({ received: true });
 });
 
-// Helper: Save transcript from voice session
-app.post('/api/save-voice-transcript', async (req, res) => {
-  try {
-    const { transcript, role } = req.body;
-    let sessionId = await getLatestSession(db).then(s => s?.id);
-    if (!sessionId) sessionId = await createSession(db);
-    
-    await addMessage(db, sessionId, role === 'assistant' ? 'assistant' : 'user', transcript);
-    
-    // Update topic scores based on what was discussed
-    const topics = detectTopics(transcript);
-    for (const topic of topics) {
-      // For voice, we assume positive exposure unless specifically corrected (logic can be tuned)
-      await recordTopicExposure(db, topic, true);
-    }
-    
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+// Billing routes (Stripe integration placeholder)  
+app.post('/api/billing/create-checkout', express.json(), (req, res) => {
+  if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder')) {
+    return res.status(503).json({ error: 'Stripe not configured' });
   }
+  // Stripe checkout session creation would go here
+  res.json({ url: '/upgrade' });
 });
 
-// Helper: Extract topics from conversation
-function detectTopics(text) {
-  const found = [];
-  const lower = text.toLowerCase();
-  if (lower.includes('air brake')) found.push('air_brakes');
-  if (lower.includes('hazmat')) found.push('hazmat_basics');
-  return [...new Set(found)];
-}
-
-// Routes
-app.post('/api/chat', async (req, res) => {
-  try {
-    const { message, sessionId } = req.body;
-    let session;
-    if (sessionId) {
-      const result = await db.query('SELECT * FROM sessions WHERE id = $1', [sessionId]);
-      session = result.rows[0];
-    }
-    if (!session) {
-      const newId = await createSession(db);
-      session = { id: newId };
-    }
-    const history = await getSessionMessages(db, session.id);
-    const messages = history.map(m => ({ role: m.role, parts: [{ text: m.content }] }));
-    const chat = model.startChat({
-      history: [
-        { role: 'user', parts: [{ text: CDL_TUTOR_PROMPT }] },
-        { role: 'model', parts: [{ text: "Ready." }] },
-        ...messages
-      ]
-    });
-    const result = await chat.sendMessage(message);
-    const responseText = result.response.text();
-    await addMessage(db, session.id, 'user', message);
-    await addMessage(db, session.id, 'assistant', responseText);
-    res.json({ response: responseText, sessionId: session.id });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  // Handle Stripe webhooks
+  console.log('Stripe webhook received');
+  res.json({ received: true });
 });
 
-app.post('/api/transcribe', upload.single('audio'), async (req, res) => {
-  try {
-    const transcription = await openai.audio.transcriptions.create({
-      file: fs.createReadStream(req.file.path),
-      model: 'whisper-1',
-    });
-    fs.unlinkSync(req.file.path);
-    res.json({ text: transcription.text });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+// User profile endpoints
+app.get('/api/user/profile', (req, res) => {
+  // Would fetch from Clerk/user DB
+  res.json({ 
+    id: 'demo-user',
+    email: 'demo@example.com',
+    plan: 'free',
+    state: 'NJ'
+  });
 });
 
-app.get('/api/progress', async (req, res) => {
-  const summary = await getProgressSummary(db);
-  res.json(summary);
+app.put('/api/user/profile', express.json(), (req, res) => {
+  // Update user profile (state selection, etc.)
+  res.json({ success: true, ...req.body });
 });
 
-app.listen(PORT, () => console.log(`Server on ${PORT}`));
+// State selection
+const STATES = [
+  { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' },
+  { code: 'AZ', name: 'Arizona' }, { code: 'AR', name: 'Arkansas' },
+  { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
+  { code: 'CT', name: 'Connecticut' }, { code: 'DE', name: 'Delaware' },
+  { code: 'FL', name: 'Florida' }, { code: 'GA', name: 'Georgia' },
+  { code: 'HI', name: 'Hawaii' }, { code: 'ID', name: 'Idaho' },
+  { code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' },
+  { code: 'IA', name: 'Iowa' }, { code: 'KS', name: 'Kansas' },
+  { code: 'KY', name: 'Kentucky' }, { code: 'LA', name: 'Louisiana' },
+  { code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' },
+  { code: 'MA', name: 'Massachusetts' }, { code: 'MI', name: 'Michigan' },
+  { code: 'MN', name: 'Minnesota' }, { code: 'MS', name: 'Mississippi' },
+  { code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' },
+  { code: 'NE', name: 'Nebraska' }, { code: 'NV', name: 'Nevada' },
+  { code: 'NH', name: 'New Hampshire' }, { code: 'NJ', name: 'New Jersey' },
+  { code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' },
+  { code: 'NC', name: 'North Carolina' }, { code: 'ND', name: 'North Dakota' },
+  { code: 'OH', name: 'Ohio' }, { code: 'OK', name: 'Oklahoma' },
+  { code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' },
+  { code: 'RI', name: 'Rhode Island' }, { code: 'SC', name: 'South Carolina' },
+  { code: 'SD', name: 'South Dakota' }, { code: 'TN', name: 'Tennessee' },
+  { code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' },
+  { code: 'VT', name: 'Vermont' }, { code: 'VA', name: 'Virginia' },
+  { code: 'WA', name: 'Washington' }, { code: 'WV', name: 'West Virginia' },
+  { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }
+];
+
+app.get('/api/states', (req, res) => {
+  res.json(STATES);
+});
+
+// Start server
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`CDL Tutor server running on port ${PORT}`);
+});
+
+module.exports = app;
