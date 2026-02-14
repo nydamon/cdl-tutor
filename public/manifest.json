@@ -1,0 +1,32 @@
+{
+  "name": "CDL Tutor",
+  "short_name": "CDL Tutor",
+  "description": "AI-powered CDL test prep with voice conversation",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#e94560",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Start Voice Session",
+      "short_name": "Call",
+      "description": "Start a voice practice session",
+      "url": "/call.html",
+      "icons": [{ "src": "/icon-96.png", "sizes": "96x96" }]
+    }
+  ]
+}

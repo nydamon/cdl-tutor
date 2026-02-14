@@ -1,0 +1,90 @@
+{
+  "state": "NJ",
+  "state_name": "New Jersey",
+  "handbook_url": "https://www.state.nj.us/mvc/drivers/CDLManual.htm",
+  "last_updated": "2024",
+  "topics": [
+    {
+      "topic": "general_knowledge",
+      "question_count": 50,
+      "sample_questions": [
+        {
+          "question": "When following another vehicle while driving a truck/bus, you should maintain a following distance of:",
+          "options": ["2 seconds", "4 seconds at 55 mph", "6 seconds for trucks", "1 second"],
+          "correct_answer": "4 seconds at 55 mph (5-6 seconds for trucks)",
+          "explanation": "NJ law requires 4-second following distance at 55mph. Trucks should use 5-6 seconds due to longer stopping distances."
+        },
+        {
+          "question": "The speed limit for trucks on the New Jersey Turnpike is:",
+          "options": ["55 mph", "65 mph", "70 mph", "No specific limit"],
+          "correct_answer": "55 mph for trucks over 10,000 lbs",
+          "explanation": "NJ Turnpike has lower speed limits for commercial vehicles."
+        }
+      ],
+      "must_memorize": [
+        "4-second following distance at 55mph",
+        "5-6 seconds for trucks",
+        "Air brake psi thresholds"
+      ]
+    },
+    {
+      "topic": "air_brakes",
+      "question_count": 25,
+      "sample_questions": [
+        {
+          "question": "At what psi does the warning light come on for air brakes?",
+          "options": ["20 psi", "60 psi", "80 psi", "100 psi"),
+          "correct_answer": "60 psi",
+          "explanation": "The warning light comes on at 60 psi."
+        },
+        {
+          "question": "At what psi do spring brakes automatically apply?",
+          "options": ["20-45 psi", "60 psi", "80 psi", "0 psi"),
+          "correct_answer": "20-45 psi (emergency applies)",
+          "explanation": "Spring brakes apply at 20-45 psi depending on adjustment."
+        }
+      ],
+      "must_memorize": [
+        "60 psi - warning light",
+        "20-45 psi - spring brakes apply",
+        "85-100 psi - normal operating range"
+      ]
+    },
+    {
+      "topic": "hazardous_materials",
+      "question_count": 30,
+      "sample_questions": [
+        {
+          "question": "What is the BAC limit for CDL holders?",
+          "options": ["0.08%", "0.04%", "0.10%", "0.00%"],
+          "correct_answer": "0.04%",
+          "explanation": "CDL holders are held to a LOWER standard than regular drivers: 0.04% BAC."
+        },
+        {
+          "question": "What class is Explosives?",
+          "options": ["Class A", "Class B", "Class C", "Class D"],
+          "correct_answer": "Class A",
+          "explanation": "Class 1 Explosives - highest danger level."
+        }
+      ],
+      "must_memorize": [
+        "0.04% BAC (not 0.08%)",
+        "Class 1 - Explosives",
+        "Class 2 - Gases",
+        "Class 3 - Flammable Liquids",
+        "Placarding table"
+      ]
+    }
+  ],
+  "state_specific_rules": [
+    "Turnpike has lower speed limits for trucks",
+    "Special rules for triple trailers on certain roads",
+    "Pre-trip inspection order: engine → cab → behind cab → trailer → coupling → lights"
+  ],
+  "test_tips": [
+    "DMV loves 'which is FALSE' questions - highlight the word FALSE",
+    "Number questions - highlight the specific number (60psi, 20ft, 500 feet)",
+    "Pick the 'safest' answer when unsure",
+    "Some questions have two right answers - one is MORE right"
+  ]
+}

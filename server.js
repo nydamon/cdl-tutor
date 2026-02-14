@@ -4,9 +4,25 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+
+// Load state data
+let stateData = {};
+let statesList = [];
+
+try {
+  const statesMeta = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/states.json'), 'utf8'));
+  statesList = statesMeta.states;
+  
+  // Load NJ as default
+  const njData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/states/NJ.json'), 'utf8'));
+  stateData['NJ'] = njData;
+} catch (e) {
+  console.log('No state data loaded:', e.message);
+}
 
 // Middleware
 app.use(cors());
@@ -92,7 +108,52 @@ const STATES = [
 ];
 
 app.get('/api/states', (req, res) => {
-  res.json(STATES);
+  res.json(statesList.length > 0 ? statesList : STATES);
+});
+
+// Get state-specific data
+app.get('/api/state/:code', (req, res) => {
+  const code = req.params.code.toUpperCase();
+  
+  // Try to load from file
+  try {
+    const data = JSON.parse(fs.readFileSync(path.join(__dirname, `data/states/${code}.json`), 'utf8'));
+    return res.json(data);
+  } catch (e) {
+    // Return basic info if no detailed data
+    return res.json({
+      state: code,
+      state_name: STATES.find(s => s.code === code)?.name || code,
+      research_status: 'coming_soon',
+      message: 'Detailed content coming soon'
+    });
+  }
+});
+
+// Get AI prompt for state
+app.get('/api/prompt/:code', (req, res) => {
+  const code = req.params.code.toUpperCase();
+  
+  let topicData = stateData[code] || stateData['NJ'];
+  
+  const prompt = `You are an expert CDL instructor helping students pass the ${code} CDL written test. 
+
+Key memorization points for ${code}:
+- 4-second following distance at 55mph (5-6 seconds for trucks)
+- Air brakes: 60psi warning, 20-45psi spring brakes
+- BAC limit: 0.04% for CDL (not 0.08%)
+
+Focus on: General Knowledge, Air Brakes, Hazardous Materials.
+
+Test tips:
+- Watch for "which is FALSE" questions
+- Highlight numbers in questions
+- Pick the SAFEST answer
+- Some questions have 2 right answers - choose the MORE right one
+
+Help the student understand WHY the answer is correct, not just what it is.`;
+
+  res.json({ prompt, state: code });
 });
 
 // Start server
