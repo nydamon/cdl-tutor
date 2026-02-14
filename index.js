@@ -1,6 +1,7 @@
 const { createServer } = require('http');
 const { parse } = require('url');
 const { readFileSync, existsSync } = require('fs');
+const statesData = require('./states');
 const { join } = require('path');
 
 const PORT = process.env.PORT || 3000;
@@ -22,8 +23,8 @@ const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const routes = {
   '/health': { status: 200, json: { status: 'ok', version: '1.0.0' }},
-  '/api/states': { 
-    status: 200, 
+  '/api/states': {
+    status: 200,
     json: [
       { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' },
       { code: 'AZ', name: 'Arizona' }, { code: 'AR', name: 'Arkansas' },
@@ -59,11 +60,11 @@ const routes = {
     handler: async (params) => {
       const code = params.code?.toUpperCase() || 'NJ';
       try {
-        const data = JSON.parse(readFileSync(join(__dirname, `data/states/${code}.json`), 'utf8');
+        const data = JSON.parse(JSON.stringify(statesData[code.toUpperCase()]), `data/states/${code}.json`), 'utf8');
         return { status: 200, json: data };
       } catch (e) {
-        return { status: 200, json: { 
-          state: code, 
+        return { status: 200, json: {
+          state: code,
           state_name: code,
           topics: [],
           message: 'Coming soon'
@@ -83,7 +84,7 @@ const routes = {
       ]
     }
   },
-  
+
   // OpenAI Realtime token endpoint
   '/api/realtime-token': {
     status: 200,
@@ -92,7 +93,7 @@ const routes = {
       if (!OPENAI_API_KEY) {
         return { status: 503, json: { error: 'OpenAI not configured' }};
       }
-      
+
       const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
         method: 'POST',
         headers: {
@@ -105,12 +106,12 @@ const routes = {
           instructions: `You are "Red", a veteran truck driver helping students pass the CDL written test. Be conversational, explain WHY answers are correct, not just what they are. Focus on memorization points: 4-second following distance, 60psi air brakes, 0.04% BAC.`
         })
       });
-      
+
       const data = await response.json();
       return { status: 200, json: data };
     }
   },
-  
+
   // Stripe checkout
   '/api/billing/create-checkout': {
     status: 200,
@@ -119,7 +120,7 @@ const routes = {
       if (!STRIPE_SECRET_KEY) {
         return { status: 503, json: { error: 'Stripe not configured' }};
       }
-      
+
       // Create checkout session via Stripe API
       const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
         method: 'POST',
@@ -140,20 +141,30 @@ const routes = {
           'cancel_url': 'https://cdl-tutor.vercel.app?canceled=true'
         })
       });
-      
+
       const data = await response.json();
       return { status: 200, json: { url: data.url || data.error }};
+    }
+  },
+
+  // Get state data (bundled)
+  '/api/state/:code': {
+    status: 200,
+    handler: (params) => {
+      const code = params.code?.toUpperCase() || 'NJ';
+      const data = statesData[code] || statesData.NJ;
+      return { status: 200, json: data };
     }
   }
 
 const server = createServer(async (req, res) => {
   const url = parse(req.url, true);
   const pathname = url.pathname;
-  
+
   // Check exact routes first
   let route = routes[pathname];
-  
-  // Check parameterized routes
+
+  // Check parameterized routes (sync)
   if (!route) {
     const stateMatch = pathname.match(/^\/api\/state\/(\w+)$/);
     if (stateMatch && routes['/api/state/:code']) {
@@ -161,9 +172,8 @@ const server = createServer(async (req, res) => {
       route._params = { code: stateMatch[1] };
     }
   }
-  
+
   if (route) {
-    
     // Handle async handlers
     if (route.async && route.handler) {
       try {
@@ -177,18 +187,27 @@ const server = createServer(async (req, res) => {
       return;
     }
     
+    // Handle sync handlers with params
+    if (route.handler) {
+      const result = route.handler(route._params || {});
+      res.writeHead(result.status, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result.json));
+      return;
+    }
+
     res.writeHead(route.status, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(route.json));
     return;
+    return;
   }
-  
+
   // Serve static files
   let filePath = join(__dirname, 'public', pathname === '/' ? 'index.html' : pathname);
-  
+
   if (!existsSync(filePath)) {
     filePath = join(__dirname, 'public', 'index.html');
   }
-  
+
   if (existsSync(filePath)) {
     const ext = filePath.match(/\.[^.]+$/)?.[0] || '.html';
     const contentType = mimeTypes[ext] || 'text/plain';
