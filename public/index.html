@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="CDL Prep">
+    <title>CDL Prep with Red</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="truck-emoji">🚛</span>
+            <h1>CDL Prep — NJ Edition</h1>
+            <p class="subtitle">Just you and Red. No flashcards, just conversation.</p>
+            <div class="voice-toggle">
+                <button id="voiceBtn" class="voice-btn" title="Toggle voice mode">
+                    <span id="voiceIcon">🔊</span> Voice Mode: <span id="voiceStatus">OFF</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div style="text-align: center; font-size: 0.8rem; color: #a8a8b3; margin-bottom: 5px;">
+            CDL Mastery: <span id="masteryPct">0</span>%
+        </div>
+
+        <!-- Topic Indicators -->
+        <div class="topic-container" id="topicContainer">
+            <!-- Topic chips injected here -->
+        </div>
+
+        <main class="chat-container" id="chatContainer">
+            <!-- Messages appear here -->
+        </main>
+
+        <div class="input-area">
+            <div class="typing-indicator" id="typingIndicator">
+                <span></span><span></span><span></span>
+            </div>
+            
+            <div class="input-row">
+                <button id="micBtn" class="mic-btn" title="Hold to talk">
+                    <span class="mic-icon">🎤</span>
+                </button>
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Type or hold mic to talk..."
+                    autocomplete="off"
+                >
+                <button id="sendBtn" class="send-btn">
+                    <span>Send</span>
+                </button>
+            </div>
+            
+            <div class="mic-hint" id="micHint">Hold mic button or press Space to talk</div>
+        </div>
+
+        <footer class="controls">
+            <button id="resumeBtn" class="secondary-btn">Resume Session</button>
+            <button id="newSessionBtn" class="secondary-btn">Start Fresh</button>
+            <button id="progressBtn" class="secondary-btn">Detailed Stats</button>
+        </footer>
+    </div>
+
+    <!-- Progress Modal -->
+    <div id="progressModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>📊 Your CDL Progress</h2>
+            <div id="progressContent"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
