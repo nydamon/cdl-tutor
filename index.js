@@ -23,7 +23,12 @@ const stateData = {
   TX: {state:'TX',state_name:'Texas',topics:[{name:'General Knowledge',must_memorize:['4-second following distance','55 mph max']},{name:'Air Brakes',must_memorize:['60 psi warning']},{name:'Hazardous Materials',must_memorize:['0.04% BAC']}]},
   CA: {state:'CA',state_name:'California',topics:[{name:'General Knowledge',must_memorize:['3-second rule']},{name:'Air Brakes',must_memorize:['60 psi warning']},{name:'Hazardous Materials',must_memorize:['0.04% BAC']}]},
   FL: {state:'FL',state_name:'Florida',topics:[{name:'General Knowledge',must_memorize:['4-second following distance']},{name:'Air Brakes',must_memorize:['60 psi warning']},{name:'Hazardous Materials',must_memorize:['0.04% BAC']}]},
-  NY: {state:'NY',state_name:'New York',topics:[{name:'General Knowledge',must_memorize:['4-second following distance']},{name:'Air Brakes',must_memorize:['60 psi warning']},{name:'Hazardous Materials',must_memorize:['0.04% BAC','TWIC']}]}
+  NY: {state:'NY',state_name:'New York',topics:[{name:'General Knowledge',must_memorize:['4-second following distance']},{name:'Air Brakes',must_memorize:['60 psi warning']},{name:'Hazardous Materials',must_memorize:['0.04% BAC','TWIC']}]},
+  PA: {state:'PA',state_name:'Pennsylvania',topics:[{name:'General Knowledge',must_memorize:['4-second following distance']},{name:'Air Brakes',must_memorize:['60 psi warning']},{name:'Hazardous Materials',must_memorize:['0.04% BAC']}]},
+  IL: {state:'IL',state_name:'Illinois',topics:[{name:'General Knowledge',must_memorize:['4-second following distance']},{name:'Air Brakes',must_memorize:['60 psi warning']},{name:'Hazardous Materials',must_memorize:['0.04% BAC']}]},
+  OH: {state:'OH',state_name:'Ohio',topics:[{name:'General Knowledge',must_memorize:['4-second following distance']},{name:'Air Brakes',must_memorize:['60 psi warning']},{name:'Hazardous Materials',must_memorize:['0.04% BAC']}]},
+  GA: {state:'GA',state_name:'Georgia',topics:[{name:'General Knowledge',must_memorize:['4-second following distance']},{name:'Air Brakes',must_memorize:['60 psi warning']},{name:'Hazardous Materials',must_memorize:['0.04% BAC']}]},
+  NC: {state:'NC',state_name:'North Carolina',topics:[{name:'General Knowledge',must_memorize:['4-second following distance']},{name:'Air Brakes',must_memorize:['60 psi warning']},{name:'Hazardous Materials',must_memorize:['0.04% BAC']}]}
 };
 
 const statesList = [
