@@ -1,0 +1,36 @@
+{
+  "state": "CA",
+  "state_name": "California",
+  "handbook_url": "https://www.dmv.ca.gov/portal/driver-education-and-safety/c/dl-manual/",
+  "topics": [
+    {
+      "topic": "general_knowledge",
+      "must_memorize": [
+        "3-second rule at 55mph",
+        "4 seconds for trucks/trailers",
+        "Air brake endorsement required over 26,000 lbs"
+      ]
+    },
+    {
+      "topic": "air_brakes",
+      "must_memorize": [
+        "60 psi - warning device",
+        "20 psi - emergency/application valve",
+        "Brake chambers color coded"
+      ]
+    },
+    {
+      "topic": "hazardous_materials",
+      "must_memorize": [
+        "0.04% BAC limit",
+        "Class A Hazardous Waste Carrier certificate",
+        "14 hours on-duty max"
+      ]
+    }
+  ],
+  "state_specific_rules": [
+    "Speed limit 55 mph for commercial vehicles",
+    "Backup camera required on 2018+ vehicles",
+    "Transponder required for toll roads"
+  ]
+}

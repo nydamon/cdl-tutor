@@ -1,0 +1,36 @@
+{
+  "state": "TX",
+  "state_name": "Texas",
+  "handbook_url": "https://www.tx.gov/state/txdps/driver-services/cdl-manual",
+  "topics": [
+    {
+      "topic": "general_knowledge",
+      "must_memorize": [
+        "4-second following distance",
+        "55 mph maximum when towing",
+        "300 feet visibility rule"
+      ]
+    },
+    {
+      "topic": "air_brakes",
+      "must_memorize": [
+        "60 psi - warning light",
+        "20-45 psi - spring brakes apply",
+        "85-100 psi - operating range"
+      ]
+    },
+    {
+      "topic": "hazardous_materials",
+      "must_memorize": [
+        "0.04% BAC (CDL standard)",
+        "Placarding required for 1001+ lbs",
+        "Shipping papers must be in front"
+      ]
+    }
+  ],
+  "state_specific_rules": [
+    "No cell phone use while driving CMV",
+    "Speed limits: 55 mph for trucks on two-lane highways",
+    "All loads must be secured"
+  ]
+}

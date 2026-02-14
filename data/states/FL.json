@@ -1,0 +1,36 @@
+{
+  "state": "FL",
+  "state_name": "Florida",
+  "handbook_url": "https://www.flhsmv.gov/driver-licenses-id/cdl/",
+  "topics": [
+    {
+      "topic": "general_knowledge",
+      "must_memorize": [
+        "4-second following distance",
+        "No handheld devices while driving",
+        "School bus stop arm violation is serious"
+      ]
+    },
+    {
+      "topic": "air_brakes",
+      "must_memorize": [
+        "60 psi - low air warning",
+        "20-45 psi - spring brakes",
+        "Parking brake test required"
+      ]
+    },
+    {
+      "topic": "hazardous_materials",
+      "must_memorize": [
+        "0.04% BAC (CDL holders)",
+        "Hazmat endorsement requires TSA approval",
+        "Placards must be visible"
+      ]
+    }
+  ],
+  "state_specific_rules": [
+    "No Texting while driving",
+    "School bus: stop on 4-lane = no stop required",
+    "Height limit signs posted"
+  ]
+}

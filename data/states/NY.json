@@ -1,0 +1,36 @@
+{
+  "state": "NY",
+  "state_name": "New York",
+  "handbook_url": "https://dmv.ny.gov/other/cdl-manual",
+  "topics": [
+    {
+      "topic": "general_knowledge",
+      "must_memorize": [
+        "4-second following distance",
+        "Air brake endorsement required",
+        "Commercial Learner's Permit requirements"
+      ]
+    },
+    {
+      "topic": "air_brakes",
+      "must_memorize": [
+        "60 psi warning",
+        "20-45 psi spring brakes",
+        "Apply parking brake before leaving vehicle"
+      ]
+    },
+    {
+      "topic": "hazardous_materials",
+      "must_memorize": [
+        "0.04% BAC",
+        "NY requires additional hazmat state test",
+        "Must have TWIC card for port access"
+      ]
+    }
+  ],
+  "state_specific_rules": [
+    "Thruway has special CMV rules",
+    "Double/triple trailers restricted",
+    "Longer combination vehicles (LCV) prohibited"
+  ]
+}

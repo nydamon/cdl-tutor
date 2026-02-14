@@ -52,7 +52,26 @@ const routes = {
       { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }
     ]
   },
-  '/api/state/NJ': {
+  // Get state-specific data
+  '/api/state/:code': {
+    status: 200,
+    async: true,
+    handler: async (params) => {
+      const code = params.code?.toUpperCase() || 'NJ';
+      try {
+        const data = JSON.parse(readFileSync(join(__dirname, `data/states/${code}.json`), 'utf8');
+        return { status: 200, json: data };
+      } catch (e) {
+        return { status: 200, json: { 
+          state: code, 
+          state_name: code,
+          topics: [],
+          message: 'Coming soon'
+        }};
+      }
+    }
+  }
+};
     status: 200,
     json: {
       state: 'NJ',
@@ -131,14 +150,24 @@ const server = createServer(async (req, res) => {
   const url = parse(req.url, true);
   const pathname = url.pathname;
   
-  // API routes
-  if (routes[pathname]) {
-    const route = routes[pathname];
+  // Check exact routes first
+  let route = routes[pathname];
+  
+  // Check parameterized routes
+  if (!route) {
+    const stateMatch = pathname.match(/^\/api\/state\/(\w+)$/);
+    if (stateMatch && routes['/api/state/:code']) {
+      route = routes['/api/state/:code'];
+      route._params = { code: stateMatch[1] };
+    }
+  }
+  
+  if (route) {
     
     // Handle async handlers
     if (route.async && route.handler) {
       try {
-        const result = await route.handler();
+        const result = await route.handler(route._params || {});
         res.writeHead(result.status, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(result.json));
       } catch (e) {
