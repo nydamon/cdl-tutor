@@ -5,6 +5,7 @@ const { join } = require('path');
 
 const PORT = process.env.PORT || 3000;
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 const mimeTypes = {
   '.html': 'text/html',
@@ -65,9 +66,45 @@ const server = createServer(async (req, res) => {
   }
   
   // Static routes
-  if (routes[pathname]) {
+  if (pathname === '/health') {
     res.writeHead(200, {'Content-Type':'application/json'});
-    res.end(JSON.stringify(routes[pathname].json));
+    res.end(JSON.stringify({status:'ok',version:'1.0.1'}));
+    return;
+  }
+  
+  if (pathname === '/api/states') {
+    res.writeHead(200, {'Content-Type':'application/json'});
+    res.end(JSON.stringify(statesList));
+    return;
+  }
+  
+  // OpenAI realtime token
+  if (pathname === '/api/realtime-token') {
+    if (!OPENAI_API_KEY) {
+      res.writeHead(503, {'Content-Type':'application/json'});
+      res.end(JSON.stringify({error:'OpenAI not configured'}));
+      return;
+    }
+    try {
+      const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-realtime-preview',
+          modalities: ['audio', 'text'],
+          instructions: 'You are "Red", a veteran truck driver helping students pass the CDL written test. Be conversational, explain WHY answers are correct. Key memorization: 4-second following distance, 60psi air brakes, 0.04% BAC.'
+        })
+      });
+      const data = await response.json();
+      res.writeHead(200, {'Content-Type':'application/json'});
+      res.end(JSON.stringify(data));
+    } catch (e) {
+      res.writeHead(500, {'Content-Type':'application/json'});
+      res.end(JSON.stringify({error:e.message}));
+    }
     return;
   }
   
