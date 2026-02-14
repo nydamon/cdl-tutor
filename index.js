@@ -108,6 +108,57 @@ const server = createServer(async (req, res) => {
     return;
   }
   
+  // Stripe checkout
+  if (pathname === '/api/billing/create-checkout' && req.method === 'POST') {
+    if (!STRIPE_SECRET_KEY) {
+      res.writeHead(503, {'Content-Type':'application/json'});
+      res.end(JSON.stringify({error:'Stripe not configured'}));
+      return;
+    }
+    try {
+      const body = await new Promise((resolve) => {
+        let data = '';
+        req.on('data', chunk => data += chunk);
+        req.on('end', () => resolve(data));
+      });
+      const { plan } = JSON.parse(body || '{}');
+      const price = plan === 'year' ? '7999' : '999';
+      const interval = plan === 'year' ? 'year' : 'month';
+      
+      const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+          'mode': 'subscription',
+          'payment_method_types[]': 'card',
+          'line_items[0][price_data][currency]': 'usd',
+          'line_items[0][price_data][product_data][name]': 'CDL Tutor Premium',
+          'line_items[0][price_data][product_data][description]': 'Unlimited voice sessions, all 50 states',
+          'line_items[0][price_data][unit_amount]': price,
+          'line_items[0][price_data][recurring][interval]': interval,
+          'line_items[0][quantity]': '1',
+          'success_url': 'https://cdl-tutor.vercel.app?success=true',
+          'cancel_url': 'https://cdl-tutor.vercel.app?canceled=true'
+        })
+      });
+      const data = await response.json();
+      if (data.error) {
+        res.writeHead(400, {'Content-Type':'application/json'});
+        res.end(JSON.stringify({error: data.error.message}));
+      } else {
+        res.writeHead(200, {'Content-Type':'application/json'});
+        res.end(JSON.stringify({url: data.url}));
+      }
+    } catch (e) {
+      res.writeHead(500, {'Content-Type':'application/json'});
+      res.end(JSON.stringify({error: e.message}));
+    }
+    return;
+  }
+  
   // Serve static files
   let filePath = join(__dirname, 'public', pathname === '/' ? 'index.html' : pathname);
   if (!existsSync(filePath)) filePath = join(__dirname, 'public', 'index.html');
