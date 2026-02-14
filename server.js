@@ -5,7 +5,12 @@ const { OpenAI } = require('openai');
 require('dotenv').config();
 
 const upload = multer({ dest: 'uploads/' });
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Initialize OpenAI only if key is available
+let openai = null;
+if (process.env.OPENAI_API_KEY && !process.env.OPENAI_API_KEY.includes('placeholder')) {
+  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { 
@@ -19,14 +24,23 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3947;
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+// Initialize Gemini only if key is available
+let genAI = null;
+let model = null;
+if (process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.includes('placeholder')) {
+  genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+}
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', openai: !!openai, db: !!db });
+});
 
 // Initialize DB (async for PostgreSQL) - with error handling
 let db;
@@ -42,6 +56,11 @@ let db;
 
 // --- NEW: Realtime Token Endpoint ---
 app.get('/api/realtime-token', async (req, res) => {
+  // Check if OpenAI is configured
+  if (!openai) {
+    return res.status(503).json({ error: 'OpenAI not configured. Please add OPENAI_API_KEY.' });
+  }
+  
   try {
     // Get weak areas to prime the voice session (skip if DB unavailable)
     let context = "";
