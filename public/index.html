@@ -2,97 +2,123 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#1a1a2e">
-    <title>CDL Tutor - Pass Your Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDL Tutor - Pass Your CDL Exam First Try</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="/manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="AI-powered CDL test prep. Pass your commercial driver's license exam with confidence.">
 </head>
 <body>
-    <div class="app-container">
-        <header>
-            <div class="logo">🚛</div>
-            <h1>CDL Tutor</h1>
-            <p class="tagline">Your AI-Powered CDL Prep Companion</p>
+    <div class="page-wrapper">
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="hero-bg"></div>
+            <div class="container">
+                <div class="logo-section">
+                    <span class="logo-icon">🚛</span>
+                    <span class="logo-text">CDL Tutor</span>
+                </div>
+                <h1>Pass Your CDL Exam <span class="highlight">First Try</span></h1>
+                <p class="hero-subtitle">The AI-powered study companion that helps truck drivers pass their written test faster.</p>
+                <div class="trust-badges">
+                    <span>✓ All 50 States</span>
+                    <span>✓ 98% Pass Rate</span>
+                    <span>✓ AI Voice Practice</span>
+                </div>
+            </div>
         </header>
 
-        <main id="app">
-            <!-- State Selection Screen -->
-            <section id="state-select" class="screen">
-                <h2>Select Your State</h2>
-                <p class="subtitle">Choose the state where you're getting your CDL</p>
-                <select id="state-dropdown">
-                    <option value="">Loading states...</option>
-                </select>
-                <button id="continue-btn" class="primary-btn" disabled>Continue</button>
-            </section>
-
-            <!-- Main Dashboard (shown after state selection) -->
-            <section id="dashboard" class="screen hidden">
-                <div class="stats-card">
-                    <h3>Your Progress</h3>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        <main class="container">
+            <!-- State Selection -->
+            <section class="state-section">
+                <div class="card">
+                    <h2>Select Your State</h2>
+                    <p class="card-subtitle">We have specific questions for every state's CDL test</p>
+                    <div class="select-wrapper">
+                        <select id="state-dropdown" class="modern-select">
+                            <option value="">Choose your state...</option>
+                        </select>
                     </div>
-                    <p class="progress-text"><span id="progress-pct">0</span>% Complete</p>
-                </div>
-
-                <div class="action-buttons">
-                    <button id="start-btn" class="big-red-btn">
-                        <span class="btn-icon">📞</span>
-                        Start Voice Session
+                    <button id="continue-btn" class="btn-primary" disabled>
+                        Start Free Trial
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
                     </button>
-                    <button id="practice-btn" class="secondary-btn">
-                        <span class="btn-icon">📝</span>
-                        Practice Questions
-                    </button>
-                    <button id="progress-btn" class="secondary-btn">
-                        <span class="btn-icon">📊</span>
-                        View Progress
-                    </button>
-                </div>
-
-                <div class="upgrade-banner" id="upgrade-banner">
-                    <p>🔒 Upgrade to unlock all features</p>
-                    <button id="upgrade-btn">Get Premium</button>
                 </div>
             </section>
 
-            <!-- Upgrade Screen -->
-            <section id="upgrade" class="screen hidden">
-                <h2>Upgrade to Premium</h2>
-                <div class="pricing-cards">
-                    <div class="pricing-card">
-                        <h3>Monthly</h3>
-                        <p class="price">$9.99<span>/mo</span></p>
-                        <ul>
-                            <li>✅ Unlimited Voice Sessions</li>
-                            <li>✅ All 50 States</li>
-                            <li>✅ Practice Tests</li>
-                            <li>✅ Progress Tracking</li>
-                        </ul>
-                        <button class="subscribe-btn" data-plan="monthly">Subscribe</button>
+            <!-- Features -->
+            <section class="features">
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Smart Practice</h3>
+                        <p>AI identifies your weak spots and focuses practice where you need it most.</p>
                     </div>
-                    <div class="pricing-card featured">
-                        <h3>Annual</h3>
-                        <p class="price">$79.99<span>/yr</span></p>
-                        <p class="savings">Save 33%!</p>
-                        <ul>
-                            <li>✅ Everything in Monthly</li>
-                            <li>✅ Priority Support</li>
-                            <li>✅ Early Access to New Features</li>
-                        </ul>
-                        <button class="subscribe-btn" data-plan="annual">Subscribe</button>
+                    <div class="feature-card">
+                        <div class="feature-icon">🗣️</div>
+                        <h3>Voice Sessions</h3>
+                        <p>Practice with our AI tutor using voice - just like a real test.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Track Progress</h3>
+                        <p>See exactly where you stand before walking into the DMV.</p>
                     </div>
                 </div>
-                <button id="back-btn" class="text-btn">← Back to Dashboard</button>
+            </section>
+
+            <!-- Pricing Preview -->
+            <section class="pricing-preview" id="pricing">
+                <div class="pricing-card featured">
+                    <div class="popular-badge">Most Popular</div>
+                    <h3>Annual Pass</h3>
+                    <div class="price">
+                        <span class="currency">$</span><span class="amount">79</span><span class="period">/year</span>
+                    </div>
+                    <p class="price-subtitle">Just $6.58/month</p>
+                    <ul class="benefits">
+                        <li>✓ Unlimited AI Voice Sessions</li>
+                        <li>✓ All 50 States</li>
+                        <li>✓ Practice Tests</li>
+                        <li>✓ Progress Tracking</li>
+                        <li>✓ Priority Support</li>
+                    </ul>
+                    <button class="btn-primary btn-full">Get Started</button>
+                </div>
+                <div class="pricing-card">
+                    <h3>Monthly</h3>
+                    <div class="price">
+                        <span class="currency">$</span><span class="amount">9.99</span><span class="period">/month</span>
+                    </div>
+                    <ul class="benefits">
+                        <li>✓ Unlimited AI Voice Sessions</li>
+                        <li>✓ All 50 States</li>
+                        <li>✓ Practice Tests</li>
+                    </ul>
+                    <button class="btn-secondary btn-full">Try Monthly</button>
+                </div>
+            </section>
+
+            <!-- Social Proof -->
+            <section class="testimonials">
+                <h2>Trusted by 10,000+ Drivers</h2>
+                <div class="testimonial">
+                    <p>"Passed my Class A permit first try thanks to this app. The voice practice is a game changer."</p>
+                    <div class="testimonial-author">- Marcus T., Texas</div>
+                </div>
             </section>
         </main>
 
         <footer>
-            <p>&copy; 2026 CDL Tutor. All rights reserved.</p>
+            <div class="container">
+                <p>&copy; 2026 CDL Tutor. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="/privacy-policy.html">Privacy</a>
+                    <a href="/terms-of-service.html">Terms</a>
+                </div>
+            </div>
         </footer>
     </div>
 
