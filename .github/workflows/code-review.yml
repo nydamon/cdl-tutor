@@ -5,6 +5,10 @@ on:
     types: [opened, synchronize, reopened]
   pull_request_review:
     types: [submitted]
+  push:
+    branches:
+      - main
+      - master
 
 jobs:
   request-review:
@@ -24,7 +28,7 @@ jobs:
           AUTHOR="${{ github.actor }}"
           URL="${{ github.event.pull_request.html_url }}"
 
-          MESSAGE="🔍 **New PR: #$PR_TITLE**"
+          MESSAGE="🔍 **New PR: #$PR_NUMBER - $PR_TITLE**"
           MESSAGE+="\n\n📦 **Repo:** \`$REPO\`"
           MESSAGE+="\n🌿 **Branch:** \`$BRANCH\` → \`$BASE_BRANCH\`"
           MESSAGE+="\n👤 **Author:** @$AUTHOR"
@@ -58,6 +62,29 @@ jobs:
           MESSAGE+="\n**Status:** $STATUS by @$REVIEWER"
           MESSAGE+="\n📦 **Repo:** \`$REPO\`"
           MESSAGE+="\n🔗 **URL:** $URL"
+
+          curl -s -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": \"$MESSAGE\"}"
+
+      - name: Notify Discord on Main Branch Push
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        run: |
+          REPO="${{ github.repository }}"
+          BRANCH="${{ github.ref_name }}"
+          AUTHOR="${{ github.actor }}"
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          COMMIT_URL="${{ github.event.head_commit.url }}"
+
+          # Get short commit hash
+          COMMIT_HASH="${COMMIT_MSG:0:7}"
+
+          MESSAGE="⚡ **Main Branch Push**"
+          MESSAGE+="\n\n📦 **Repo:** \`$REPO\`"
+          MESSAGE+="\n🌿 **Branch:** \`$BRANCH\`"
+          MESSAGE+="\n👤 **Author:** @$AUTHOR"
+          MESSAGE+="\n📝 **Commit:** \`$COMMIT_HASH\` - $COMMIT_MSG"
+          MESSAGE+="\n🔗 **URL:** https://github.com/$REPO/commit/${{ github.sha }}"
 
           curl -s -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
             -H "Content-Type: application/json" \
