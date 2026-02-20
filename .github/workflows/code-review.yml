@@ -3,6 +3,8 @@ name: Code Review Request
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  pull_request_review:
+    types: [submitted]
 
 jobs:
   request-review:
@@ -11,7 +13,8 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Notify Discord
+      - name: Notify Discord on PR Open/Update
+        if: github.event_name == 'pull_request'
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           PR_TITLE="${{ github.event.pull_request.title }}"
@@ -21,10 +24,39 @@ jobs:
           AUTHOR="${{ github.actor }}"
           URL="${{ github.event.pull_request.html_url }}"
 
-          MESSAGE="🔍 **New PR: #$PR_NUMBER - $PR_TITLE**"
+          MESSAGE="🔍 **New PR: #$PR_TITLE**"
           MESSAGE+="\n\n📦 **Repo:** \`$REPO\`"
           MESSAGE+="\n🌿 **Branch:** \`$BRANCH\` → \`$BASE_BRANCH\`"
           MESSAGE+="\n👤 **Author:** @$AUTHOR"
+          MESSAGE+="\n🔗 **URL:** $URL"
+
+          curl -s -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": \"$MESSAGE\"}"
+
+      - name: Notify Discord on Review Submit
+        if: github.event_name == 'pull_request_review'
+        run: |
+          STATE="${{ github.event.review.state }}"
+          REVIEWER="${{ github.event.review.user.login }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          REPO="${{ github.repository }}"
+          URL="${{ github.event.pull_request.html_url }}"
+          
+          if [[ "$STATE" == "APPROVED" ]]; then
+            EMOJI="✅"
+            STATUS="Approved"
+          elif [[ "$STATE" == "CHANGES_REQUESTED" ]]; then
+            EMOJI="❌"
+            STATUS="Changes Requested"
+          else
+            echo "Review state $STATE - skipping notification"
+            exit 0
+          fi
+
+          MESSAGE="$EMOJI **PR #$PR_NUMBER Review Update**"
+          MESSAGE+="\n**Status:** $STATUS by @$REVIEWER"
+          MESSAGE+="\n📦 **Repo:** \`$REPO\`"
           MESSAGE+="\n🔗 **URL:** $URL"
 
           curl -s -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
