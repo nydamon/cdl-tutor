@@ -1,0 +1,88 @@
+name: Code Review Request
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+jobs:
+  request-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Get PR info
+        id: pr_info
+        run: |
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_OUTPUT
+          echo "PR_BODY=${{ github.event.pull_request.body }}" >> $GITHUB_OUTPUT
+          echo "REPO=${{ github.repository }}" >> $GITHUB_OUTPUT
+          echo "BRANCH=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          echo "AUTHOR=${{ github.actor }}" >> $GITHUB_OUTPUT
+          echo "URL=${{ github.event.pull_request.html_url }}" >> $GITHUB_OUTPUT
+          echo "BASE_BRANCH=${{ github.base_ref }}" >> $GITHUB_OUTPUT
+
+      - name: Get changed files
+        id: changed_files
+        run: |
+          FILES=$(gh pr view ${{ steps.pr_info.outputs.PR_NUMBER }} --json files -q '.files[].path' 2>/dev/null || echo "")
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+
+      - name: Get PR diff
+        id: pr_diff
+        run: |
+          DIFF=$(gh pr diff ${{ steps.pr_info.outputs.PR_NUMBER }} --repo ${{ steps.pr_info.outputs.REPO }} 2>/dev/null | head -500)
+          # Escape for JSON
+          DIFF="${DIFF//'%'/'%25'}"
+          DIFF="${DIFF//$'\n'/'%0A'}"
+          DIFF="${DIFF//$'\r'/'%0D'}"
+          echo "diff_length=$(echo "$DIFF" | wc -c)" >> $GITHUB_OUTPUT
+
+      - name: Notify Discord
+        if: github.event_name == 'pull_request'
+        run: |
+          # Check if this is a review dismissal (ignore those)
+          if [[ "${{ github.event_name }}" == "pull_request_review" && "${{ github.event.action }}" == "dismissed" ]]; then
+            echo "Review dismissed, skipping notification"
+            exit 0
+          fi
+
+          # Determine event type
+          EVENT_TYPE="New PR"
+          if [[ "${{ github.event.action }}" == "synchronize" ]]; then
+            EVENT_TYPE="Updated PR"
+          elif [[ "${{ github.event.action }}" == "reopened" ]]; then
+            EVENT_TYPE="Reopened PR"
+          fi
+
+          # Build message
+          MESSAGE="🔍 **$EVENT_TYPE: #${{ steps.pr_info.outputs.PR_NUMBER }} - ${{ steps.pr_info.outputs.PR_TITLE }}**"
+          MESSAGE+="\n\n📦 **Repo:** \`${{ steps.pr_info.outputs.REPO }}\`"
+          MESSAGE+="\n🌿 **Branch:** \`${{ steps.pr_info.outputs.BRANCH }}\` → \`${{ steps.pr_info.outputs.BASE_BRANCH }}\`"
+          MESSAGE+="\n👤 **Author:** @${{ steps.pr_info.outputs.AUTHOR }}"
+          MESSAGE+="\n🔗 **URL:** ${{ steps.pr_info.outputs.URL }}"
+          MESSAGE+="\n📝 **Files changed:** ${{ steps.changed_files.outputs.files }}"
+
+          curl -s -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": \"$MESSAGE\"}"
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+
+      - name: Notify on review complete
+        if: github.event_name == 'pull_request_review'
+        run: |
+          if [[ "${{ github.event.review.state }}" == "APPROVED" ]]; then
+            MESSAGE="✅ **PR #${{ steps.pr_info.outputs.PR_NUMBER }} Approved!**\n"
+            MESSAGE+="Repo: \`${{ steps.pr_info.outputs.REPO }}\`\n"
+            MESSAGE+="URL: ${{ steps.pr_info.outputs.URL }}"
+            
+            curl -s -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"content\": \"$MESSAGE\"}"
+          fi
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
